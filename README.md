@@ -6,3 +6,5 @@
 4. Hit run?
 
 Apologies for the mess. YMMV.
+
+README has been edited by Finn
