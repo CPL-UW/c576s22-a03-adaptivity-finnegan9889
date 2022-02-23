@@ -45,7 +45,12 @@ public class GMScript : MonoBehaviour
     private Vector3Int[] PIECE_J;
     private Vector3Int[] PIECE_S;
     private Vector3Int[] PIECE_I;
+    private Vector3Int[] PIECE_SQ;
     private Vector3Int[][] PIECES; 
+
+    private float dropCount; //Counts number of times a piece has been dropped
+    private float pieceCount = 0; //total number of pieces used
+    private float dropRatio = 0;
 
     // ReSharper disable once InconsistentNaming
     private int wx2bx(int wx)
@@ -61,6 +66,7 @@ public class GMScript : MonoBehaviour
         PIECE_S = new Vector3Int[] { new(0,-1), new(-1,-1),new(0,0),  new(1,0) };
         PIECE_Z = new Vector3Int[] { new(0,-1), new(1,-1), new(0,0),  new(-1,0) };
         PIECE_I = new Vector3Int[] { new(0,0),  new(-1,0), new(-2,0), new(1,0) };
+        PIECE_SQ = new Vector3Int[] { new(0,0),  new(-1,0), new(0,-1), new(-1,-1) };
         PIECES = new []{PIECE_T,PIECE_L,PIECE_Z,PIECE_J,PIECE_S,PIECE_I};
     }
     
@@ -85,6 +91,10 @@ public class GMScript : MonoBehaviour
             _myPiece[i].x = targetPiece[i].x + midX;
             _myPiece[i].y = targetPiece[i].y + maxY;
         }
+        dropRatio = dropCount / pieceCount;
+        Debug.Log(dropRatio.ToString());
+        pieceCount++;
+        adapt();
         return ValidPiece();
     }
     
@@ -124,7 +134,7 @@ public class GMScript : MonoBehaviour
         var newChunk = new Vector3Int[] { };
         foreach (var p in _myChunk)
         {
-            if (p.y > row)
+            if (p.y > row )
             {
                 Vector3Int [] movedPieces = {new(p.x, p.y - 1, p.z)};
                 newChunk = newChunk.Concat(movedPieces).ToArray();
@@ -156,7 +166,6 @@ public class GMScript : MonoBehaviour
             { 
                 _score += 1;
                if (DEBUG_MODE) Debug.Log($"KILL ROW: {row}! Score: {_score}");
-               
                return KillRow(row);
             }
         }
@@ -275,6 +284,7 @@ public class GMScript : MonoBehaviour
 
     void DoTetrisDrop()
     {
+        dropCount++;
         ChunkPiece();
     }
 
@@ -365,5 +375,13 @@ public class GMScript : MonoBehaviour
         }
     } 
     
+    //If the player can successfully quick-drop 90% of the pieces they are given, they may receive square pieces
+    void adapt(){
+        if(dropRatio >= 0.8){
+            PIECES = new []{PIECE_T,PIECE_L,PIECE_Z,PIECE_J,PIECE_S,PIECE_I,PIECE_SQ};
+        }else{
+            PIECES = new []{PIECE_T,PIECE_L,PIECE_Z,PIECE_J,PIECE_S,PIECE_I};
+        }
+    }
    
 }
